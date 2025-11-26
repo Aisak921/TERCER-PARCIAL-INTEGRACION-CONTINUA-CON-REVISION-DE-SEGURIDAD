@@ -1,20 +1,26 @@
-# Use an official Node.js runtime as a parent image
-FROM node:14
+# Imagen base ligera y soportada
+FROM node:20-alpine
 
-# Set the working directory in the container
+# Crear usuario no root para ejecutar la app
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Directorio de trabajo
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json to the working directory
+# Copiar solo definición de dependencias
 COPY package*.json ./
 
-# Install app dependencies
-RUN npm install
+# Instalar dependencias de producción (no requiere package-lock.json)
+RUN npm install --only=production
 
-# Copy the rest of the application code to the working directory
+# Copiar el resto del código de la aplicación
 COPY . .
 
-# Expose the port the app runs on
+# Ejecutar con usuario no root
+USER appuser
+
+# Exponer el puerto de la aplicación
 EXPOSE 3000
 
-# Define the command to run the application
+# Comando de inicio
 CMD ["npm", "start"]
